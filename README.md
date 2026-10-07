@@ -114,6 +114,28 @@ openssl req -x509 -nodes -days 9999 -newkey rsa:2048 -keyout ~/.gotty.key -out ~
 
 For additional security, you can use the SSL/TLS client certificate authentication by providing a CA certificate file to the `--tls-ca-crt` option (this option requires the `-t` or `--tls` to be set). This option requires all clients to send valid client certificates that are signed by the specified certification authority.
 
+### Accessing GoTTY from Another Machine
+
+By default, GoTTY listens on all network interfaces (`0.0.0.0`) and prints every URL clients can use at startup:
+
+```
+HTTP server is listening at: http://[::]:8080/
+Alternative URL: http://192.168.56.101:8080/
+```
+
+If the browser on another machine (for example, the host OS of a virtual machine) cannot connect, check the following:
+
+* **Listen address**: make sure you haven't set `--address` (or `address` in `.gotty`) to `127.0.0.1` or `localhost`. GoTTY logs a warning when it listens only on a loopback address.
+* **Firewall**: many distributions block incoming connections by default. On CentOS/RHEL 7 or later, open the port with:
+
+  ```sh
+  sudo firewall-cmd --add-port=8080/tcp --permanent
+  sudo firewall-cmd --reload
+  ```
+
+  On Ubuntu, use `sudo ufw allow 8080/tcp`.
+* **VM networking**: with NAT networking (the default in VirtualBox and many other hypervisors), the VM's IP address is not reachable from the host. Either add a port forwarding rule (e.g. host port `8080` to guest port `8080`) and open `http://localhost:8080/` on the host, or switch the VM network adapter to "Bridged" or "Host-only" mode and use one of the "Alternative URL"s printed by GoTTY.
+
 ## Sharing with Multiple Clients
 
 GoTTY starts a new process with the given command when a new client connects to the server. This means users cannot share a single terminal with others by default. However, you can use terminal multiplexers for sharing a single process with multiple clients.
