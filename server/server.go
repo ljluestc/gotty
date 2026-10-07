@@ -127,11 +127,13 @@ func (server *Server) Run(ctx context.Context, options ...RunOption) error {
 		scheme = "https"
 	}
 	host, port, _ := net.SplitHostPort(listener.Addr().String())
-	log.Printf("HTTP server is listening at: %s", scheme+"://"+host+":"+port+path)
-	if server.options.Address == "0.0.0.0" {
+	log.Printf("HTTP server is listening at: %s", buildURL(scheme, host, port, path))
+	if isWildcardAddress(server.options.Address) {
 		for _, address := range listAddresses() {
-			log.Printf("Alternative URL: %s", scheme+"://"+address+":"+port+path)
+			log.Printf("Alternative URL: %s", buildURL(scheme, address, port, path))
 		}
+	} else if ip := net.ParseIP(host); ip != nil && ip.IsLoopback() {
+		log.Printf("Listening on a loopback address, only clients on this machine can connect. Use `--address 0.0.0.0` to accept remote clients")
 	}
 
 	srvErr := make(chan error, 1)
