@@ -155,7 +155,7 @@ You can build a binary using the following commands. Windows is not supported no
 
 ```sh
 # Install tools
-go get github.com/jteeuwen/go-bindata/...
+go install github.com/go-bindata/go-bindata/v3/go-bindata@v3.1.3
 go get github.com/tools/godep
 
 # Build
@@ -163,6 +163,8 @@ make
 ```
 
 To build the frontend part (JS files and other static files), you need `npm`.
+
+The static files are embedded into `server/asset.go` by `go-bindata`. Use the version installed above: old or incompatible builds (such as distribution packages) generate code without `AssetDir`, which breaks the build with `undefined: AssetDir`. `make asset` checks for this and stops before overwriting `server/asset.go`.
 
 ## Architecture
 
